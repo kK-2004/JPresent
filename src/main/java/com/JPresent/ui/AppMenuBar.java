@@ -7,9 +7,6 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.event.ActionEvent;
 
-/**
- * 现代化菜单栏。
- */
 public class AppMenuBar extends JMenuBar {
 
     public AppMenuBar(MainWindow window, FileController fileController, DrawingController drawingController) {

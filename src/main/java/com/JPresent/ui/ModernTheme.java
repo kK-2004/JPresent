@@ -7,8 +7,7 @@ import javax.swing.plaf.FontUIResource;
 import java.awt.*;
 
 /**
- * 现代化UI主题配置类
- * 提供简约、现代化的颜色方案和样式设置
+ * UI主题配置类
  */
 public class ModernTheme {
 
@@ -57,9 +56,6 @@ public class ModernTheme {
     // 阴影
     public static final Color SHADOW = new Color(0, 0, 0, 8);
 
-    /**
-     * 应用现代化主题到整个应用
-     */
     public static void apply() {
         try {
             // 设置系统外观
@@ -110,27 +106,18 @@ public class ModernTheme {
         }
     }
 
-    /**
-     * 创建现代化按钮
-     */
     public static JButton createButton(String text) {
         JButton button = new JButton(text);
         styleButton(button, false);
         return button;
     }
 
-    /**
-     * 创建主要按钮（带主色调）
-     */
     public static JButton createPrimaryButton(String text) {
         JButton button = new JButton(text);
         styleButton(button, true);
         return button;
     }
 
-    /**
-     * 为按钮应用现代化样式
-     */
     public static void styleButton(JButton button, boolean isPrimary) {
         button.setFont(FONT_REGULAR);
         button.setFocusPainted(false);
@@ -176,9 +163,6 @@ public class ModernTheme {
         button.setMargin(new Insets(8, 16, 8, 16));
     }
 
-    /**
-     * 创建工具栏按钮
-     */
     public static JButton createToolbarButton(String text) {
         JButton button = new JButton(text);
         button.putClientProperty("selected", Boolean.FALSE);
@@ -210,9 +194,6 @@ public class ModernTheme {
         return button;
     }
 
-    /**
-     * 创建圆角边框
-     */
     public static Border createRoundedBorder(int radius) {
         return BorderFactory.createCompoundBorder(
             new RoundedBorder(radius, BORDER),
@@ -220,9 +201,6 @@ public class ModernTheme {
         );
     }
 
-    /**
-     * 创建卡片面板
-     */
     public static JPanel createCard() {
         JPanel panel = new JPanel();
         panel.setBackground(SURFACE);
@@ -233,9 +211,7 @@ public class ModernTheme {
         return panel;
     }
 
-    /**
-     * 自定义圆角边框类
-     */
+
     static class RoundedBorder implements Border {
         private final int radius;
         private final Color color;

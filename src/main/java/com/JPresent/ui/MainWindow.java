@@ -30,7 +30,6 @@ public class MainWindow extends JFrame {
         setSize(1200, 800);
         setLocationRelativeTo(null);
 
-        // 应用现代化主题
         ModernTheme.apply();
         getContentPane().setBackground(ModernTheme.BACKGROUND);
 
@@ -56,7 +55,6 @@ public class MainWindow extends JFrame {
         AppToolBar toolBar = new AppToolBar(drawingController);
         add(toolBar, BorderLayout.NORTH);
 
-        // 美化滚动面板
         JScrollPane slideScroll = new JScrollPane(slidePanel);
         slideScroll.setBorder(null);
         slideScroll.getViewport().setBackground(ModernTheme.BACKGROUND);
@@ -66,7 +64,6 @@ public class MainWindow extends JFrame {
         thumbScroll.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, ModernTheme.BORDER));
         thumbScroll.getViewport().setBackground(ModernTheme.SIDEBAR_BG);
 
-        // 美化分割面板
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, thumbScroll, slideScroll);
         splitPane.setDividerLocation(220);
         splitPane.setDividerSize(1);

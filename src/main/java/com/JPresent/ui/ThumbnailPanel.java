@@ -11,7 +11,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- * 现代化缩略图面板。
  * 缩略图按PPT标准尺寸（1920x1080）等比缩放
  */
 public class ThumbnailPanel extends JPanel {

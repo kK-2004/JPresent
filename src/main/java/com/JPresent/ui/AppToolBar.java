@@ -6,9 +6,6 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
-/**
- * 现代化工具栏。
- */
 public class AppToolBar extends JToolBar {
 
     private JButton currentSelectedButton;
@@ -42,8 +39,6 @@ public class AppToolBar extends JToolBar {
         addSeparator(new Dimension(8, 0));
         add(lineButton);
         add(textButton);
-
-        // 添加弹性空间
         add(Box.createHorizontalGlue());
     }
 

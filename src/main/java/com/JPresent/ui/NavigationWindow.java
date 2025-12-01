@@ -5,9 +5,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
 
-/**
- * 现代化启动导航窗口，提供新建和打开入口。
- */
 public class NavigationWindow extends JFrame {
 
     public NavigationWindow() {
@@ -33,7 +30,7 @@ public class NavigationWindow extends JFrame {
         titleLabel.setForeground(ModernTheme.TEXT_PRIMARY);
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel subtitleLabel = new JLabel("简约现代的演示文稿编辑器");
+        JLabel subtitleLabel = new JLabel("演示文稿编辑器");
         subtitleLabel.setFont(ModernTheme.FONT_REGULAR);
         subtitleLabel.setForeground(ModernTheme.TEXT_SECONDARY);
         subtitleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
