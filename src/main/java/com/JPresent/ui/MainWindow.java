@@ -79,4 +79,36 @@ public class MainWindow extends JFrame {
     public FileController getFileController() {
         return fileController;
     }
+
+    public Presentation getPresentation() {
+        return presentation;
+    }
+
+    /**
+     * 从第一张开始播放幻灯片。
+     */
+    public void startSlideShowFromBeginning() {
+        SlideShowWindow window = new SlideShowWindow(
+                this,
+                presentation,
+                slidePanel,
+                thumbnailPanel,
+                0
+        );
+        window.start();
+    }
+
+    /**
+     * 从当前幻灯片开始播放。
+     */
+    public void startSlideShowFromCurrent() {
+        SlideShowWindow window = new SlideShowWindow(
+                this,
+                presentation,
+                slidePanel,
+                thumbnailPanel,
+                presentation.getCurrentIndex()
+        );
+        window.start();
+    }
 }

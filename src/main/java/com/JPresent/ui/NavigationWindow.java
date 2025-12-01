@@ -103,7 +103,7 @@ public class NavigationWindow extends JFrame {
 
         add(topPanel, BorderLayout.NORTH);
         add(buttonPanel, BorderLayout.CENTER);
-        add(bottomPanel, BorderLayout.SOUTH);
+//        add(bottomPanel, BorderLayout.SOUTH);
     }
 }
 

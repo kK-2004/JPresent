@@ -40,8 +40,14 @@ public class AppMenuBar extends JMenuBar {
         insertMenu.add(createMenuItem("直线", null, e -> drawingController.setTool(DrawingController.Tool.LINE)));
         insertMenu.add(createMenuItem("图片", null, e -> drawingController.insertImage()));
 
+        // 放映菜单
+        JMenu slideShowMenu = createMenu("放映");
+        slideShowMenu.add(createMenuItem("从第一张开始播放", "F5", e -> window.startSlideShowFromBeginning()));
+        slideShowMenu.add(createMenuItem("从当前幻灯片开始播放", "Shift+F5", e -> window.startSlideShowFromCurrent()));
+
         add(fileMenu);
         add(insertMenu);
+        add(slideShowMenu);
     }
 
     private JMenu createMenu(String text) {
