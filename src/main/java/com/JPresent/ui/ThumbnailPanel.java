@@ -110,6 +110,13 @@ public class ThumbnailPanel extends JPanel {
 
             // 设置裁剪区域
             g2d.setClip(0, 0, SlideConstants.SLIDE_WIDTH, SlideConstants.SLIDE_HEIGHT);
+            // 填充幻灯片背景色
+            java.awt.Color bg = slide.getBackgroundColor();
+            if (bg == null) {
+                bg = java.awt.Color.WHITE;
+            }
+            g2d.setColor(bg);
+            g2d.fillRect(0, 0, SlideConstants.SLIDE_WIDTH, SlideConstants.SLIDE_HEIGHT);
             for (SlideObject object : slide.getObjects()) {
                 object.draw(g2d);
             }

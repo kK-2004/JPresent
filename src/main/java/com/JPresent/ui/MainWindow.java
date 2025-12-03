@@ -6,9 +6,11 @@ import com.JPresent.controller.DrawingController;
 import com.JPresent.model.Presentation;
 import com.JPresent.service.ExportService;
 import com.JPresent.service.FileService;
+import com.JPresent.service.UndoRedoService;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
+import java.io.IOException;
 
 /**
  * 主窗口。
@@ -17,6 +19,7 @@ public class MainWindow extends JFrame {
 
     private final FileService fileService;
     private final ExportService exportService;
+    private final UndoRedoService undoRedoService;
     private final Presentation presentation;
     private final SlidePanel slidePanel;
     private final ThumbnailPanel thumbnailPanel;
@@ -36,8 +39,10 @@ public class MainWindow extends JFrame {
         this.presentation = new Presentation();
         this.fileService = new FileService();
         this.exportService = new ExportService();
+        this.undoRedoService = new UndoRedoService();
 
         this.slidePanel = new SlidePanel(presentation);
+        this.slidePanel.setUndoRedoService(undoRedoService);
         this.thumbnailPanel = new ThumbnailPanel(presentation, slidePanel);
         this.slidePanel.setThumbnailPanel(thumbnailPanel);
 
@@ -81,9 +86,18 @@ public class MainWindow extends JFrame {
         return presentation;
     }
 
+    public SlidePanel getSlidePanel() {
+        return slidePanel;
+    }
+
+    public ThumbnailPanel getThumbnailPanel() {
+        return thumbnailPanel;
+    }
+
     /**
      * 从第一张开始播放幻灯片。
      */
+
     public void startSlideShowFromBeginning() {
         SlideShowWindow window = new SlideShowWindow(
                 this,
@@ -95,9 +109,6 @@ public class MainWindow extends JFrame {
         window.start();
     }
 
-    /**
-     * 从当前幻灯片开始播放。
-     */
     public void startSlideShowFromCurrent() {
         SlideShowWindow window = new SlideShowWindow(
                 this,
@@ -107,5 +118,43 @@ public class MainWindow extends JFrame {
                 presentation.getCurrentIndex()
         );
         window.start();
+    }
+
+    /**
+     * 撤销上一步操作。
+     */
+    public void undo() {
+        try {
+            undoRedoService.undo(presentation);
+            if (slidePanel.getSelectionController() != null) {
+                slidePanel.getSelectionController().setSelectedObject(null);
+            }
+            slidePanel.repaint();
+            if (thumbnailPanel != null) {
+                thumbnailPanel.repaint();
+            }
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "撤销失败: " + ex.getMessage(), "错误",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * 重做上一步撤销。
+     */
+    public void redo() {
+        try {
+            undoRedoService.redo(presentation);
+            if (slidePanel.getSelectionController() != null) {
+                slidePanel.getSelectionController().setSelectedObject(null);
+            }
+            slidePanel.repaint();
+            if (thumbnailPanel != null) {
+                thumbnailPanel.repaint();
+            }
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "重做失败: " + ex.getMessage(), "错误",
+                    JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

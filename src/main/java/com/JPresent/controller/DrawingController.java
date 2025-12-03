@@ -52,6 +52,10 @@ public class DrawingController {
         // 将视图坐标转换为幻灯片坐标
         int x = slidePanel.toSlideX(e.getX());
         int y = slidePanel.toSlideY(e.getY());
+        // 对创建新对象的操作记录撤销快照
+        if (currentTool != Tool.SELECT) {
+            slidePanel.snapshotForUndo();
+        }
         switch (currentTool) {
             case RECTANGLE:
                 RectangleShape rectangleShape = new RectangleShape(x, y);
@@ -87,6 +91,7 @@ public class DrawingController {
         int result = chooser.showOpenDialog(slidePanel);
         if (result == JFileChooser.APPROVE_OPTION) {
             File file = chooser.getSelectedFile();
+            slidePanel.snapshotForUndo();
             Slide slide = presentation.getCurrentSlide();
             ImageObject imageObject = new ImageObject(50, 50, file.getAbsolutePath());
             slide.getObjects().add(imageObject);

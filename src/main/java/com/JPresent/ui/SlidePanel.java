@@ -7,6 +7,7 @@ import com.JPresent.model.LineShape;
 import com.JPresent.model.Slide;
 import com.JPresent.model.SlideObject;
 import com.JPresent.model.SlideConstants;
+import com.JPresent.service.UndoRedoService;
 
 import javax.swing.JPanel;
 import javax.swing.Scrollable;
@@ -29,6 +30,8 @@ public class SlidePanel extends JPanel implements Scrollable {
     private DrawingController drawingController;
     private SelectionController selectionController;
     private ThumbnailPanel thumbnailPanel;
+    private UndoRedoService undoRedoService;
+    private int slideMargin = 20;
 
     public SlidePanel(Presentation presentation) {
         this.presentation = presentation;
@@ -36,11 +39,7 @@ public class SlidePanel extends JPanel implements Scrollable {
 
         setFocusable(true);
 
-        // 添加边框效果
-        setBorder(javax.swing.BorderFactory.createCompoundBorder(
-                javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20),
-                javax.swing.BorderFactory.createLineBorder(ModernTheme.BORDER, 1)
-        ));
+        setSlideMargin(20);
 
         SlideMouseAdapter adapter = new SlideMouseAdapter(this);
         addMouseListener(adapter);
@@ -87,8 +86,36 @@ public class SlidePanel extends JPanel implements Scrollable {
         return thumbnailPanel;
     }
 
+    public void setUndoRedoService(UndoRedoService undoRedoService) {
+        this.undoRedoService = undoRedoService;
+    }
+
+    public UndoRedoService getUndoRedoService() {
+        return undoRedoService;
+    }
+
     public Slide getCurrentSlide() {
         return presentation.getCurrentSlide();
+    }
+
+    public int getSlideMargin() {
+        return slideMargin;
+    }
+
+    public void setSlideMargin(int margin) {
+        this.slideMargin = Math.max(0, margin);
+        setBorder(javax.swing.BorderFactory.createCompoundBorder(
+                javax.swing.BorderFactory.createEmptyBorder(slideMargin, slideMargin, slideMargin, slideMargin),
+                javax.swing.BorderFactory.createLineBorder(ModernTheme.BORDER, 1)
+        ));
+        revalidate();
+        repaint();
+    }
+
+    public void snapshotForUndo() {
+        if (undoRedoService != null) {
+            undoRedoService.snapshot(presentation);
+        }
     }
 
     /**
@@ -120,6 +147,7 @@ public class SlidePanel extends JPanel implements Scrollable {
         }
         int code = e.getKeyCode();
         if (code == KeyEvent.VK_DELETE || code == KeyEvent.VK_BACK_SPACE) {
+            snapshotForUndo();
             Slide slide = presentation.getCurrentSlide();
             slide.getObjects().remove(selected);
             selectionController.setSelectedObject(null);
@@ -175,6 +203,12 @@ public class SlidePanel extends JPanel implements Scrollable {
         g2d.scale(scale, scale);
 
         Slide slide = presentation.getCurrentSlide();
+        Color bg = slide.getBackgroundColor();
+        if (bg == null) {
+            bg = Color.WHITE;
+        }
+        g2d.setColor(bg);
+        g2d.fillRect(0, 0, SlideConstants.SLIDE_WIDTH, SlideConstants.SLIDE_HEIGHT);
         for (SlideObject object : slide.getObjects()) {
             object.draw(g2d);
         }

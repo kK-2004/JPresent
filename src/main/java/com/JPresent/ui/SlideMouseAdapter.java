@@ -79,10 +79,12 @@ public class SlideMouseAdapter extends MouseAdapter {
                 double distStart = distance(sx, sy, x1, y1);
                 double distEnd = distance(sx, sy, x2, y2);
                 if (distStart <= threshold) {
+                    slidePanel.snapshotForUndo();
                     dragMode = DragMode.RESIZE;
                     lineHandle = LineHandle.START;
                     return;
                 } else if (distEnd <= threshold) {
+                    slidePanel.snapshotForUndo();
                     dragMode = DragMode.RESIZE;
                     lineHandle = LineHandle.END;
                     return;
@@ -90,6 +92,7 @@ public class SlideMouseAdapter extends MouseAdapter {
 
                 double distToSegment = distanceToSegment(sx, sy, x1, y1, x2, y2);
                 if (distToSegment <= threshold) {
+                    slidePanel.snapshotForUndo();
                     dragMode = DragMode.MOVE;
                     return;
                 }
@@ -99,9 +102,11 @@ public class SlideMouseAdapter extends MouseAdapter {
                     int cornerX = bounds.x + bounds.width;
                     int cornerY = bounds.y + bounds.height;
                     if (Math.abs(sx - cornerX) <= 8 && Math.abs(sy - cornerY) <= 8) {
+                        slidePanel.snapshotForUndo();
                         dragMode = DragMode.RESIZE;
                         return;
                     } else {
+                        slidePanel.snapshotForUndo();
                         dragMode = DragMode.MOVE;
                     }
                 }
@@ -139,6 +144,7 @@ public class SlideMouseAdapter extends MouseAdapter {
             selectionController.selectAt(e.getX(), e.getY());
             SlideObject selected = selectionController.getSelectedObject();
             if (selected instanceof TextBox) {
+                slidePanel.snapshotForUndo();
                 if (TextEditDialog.editText(slidePanel, (TextBox) selected, false)) {
                     slidePanel.repaint();
                     if (slidePanel.getThumbnailPanel() != null) {
@@ -267,12 +273,14 @@ public class SlideMouseAdapter extends MouseAdapter {
 
         JMenuItem styleItem = new JMenuItem("样式设置...");
         styleItem.addActionListener(ae -> {
+            slidePanel.snapshotForUndo();
             StyleDialog.showDialog(slidePanel, selected);
             slidePanel.repaint();
         });
 
         JMenuItem deleteItem = new JMenuItem("删除");
         deleteItem.addActionListener(ae -> {
+            slidePanel.snapshotForUndo();
             var slide = slidePanel.getCurrentSlide();
             slide.getObjects().remove(selected);
             selectionController.setSelectedObject(null);

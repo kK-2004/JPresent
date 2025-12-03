@@ -7,6 +7,7 @@ import com.JPresent.model.SlideObject;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -20,6 +21,22 @@ public class SlideShowWindow extends JFrame {
     private final SlidePanel editSlidePanel;
     private final ThumbnailPanel editThumbnailPanel;
     private final SlideShowPanel slideShowPanel;
+
+    private enum TransitionEffect {
+        NONE,
+        FADE,
+        SLIDE,
+        ZOOM
+    }
+
+    private TransitionEffect transitionEffect = TransitionEffect.FADE;
+    private boolean animating = false;
+    private boolean animForward = true;
+    private float animationProgress = 1.0f;
+    private Slide animFromSlide;
+    private Slide animToSlide;
+    private int animTargetIndex = -1;
+    private javax.swing.Timer animationTimer;
 
     public SlideShowWindow(JFrame owner,
                            Presentation presentation,
@@ -110,9 +127,7 @@ public class SlideShowWindow extends JFrame {
     private void nextSlide() {
         int index = presentation.getCurrentIndex();
         if (index < presentation.getSlides().size() - 1) {
-            presentation.setCurrentIndex(index + 1);
-            slideShowPanel.repaint();
-            refreshEditorViews();
+            startTransition(index + 1, true);
         } else {
             // 最后一页时退出
             dispose();
@@ -122,10 +137,51 @@ public class SlideShowWindow extends JFrame {
     private void previousSlide() {
         int index = presentation.getCurrentIndex();
         if (index > 0) {
-            presentation.setCurrentIndex(index - 1);
+            startTransition(index - 1, false);
+        }
+    }
+
+    private void startTransition(int newIndex, boolean forward) {
+        if (newIndex < 0 || newIndex >= presentation.getSlides().size()) {
+            return;
+        }
+        if (transitionEffect == TransitionEffect.NONE || presentation.getSlides().size() <= 1) {
+            presentation.setCurrentIndex(newIndex);
             slideShowPanel.repaint();
             refreshEditorViews();
+            return;
         }
+        if (animating) {
+            return;
+        }
+        animating = true;
+        animForward = forward;
+        animTargetIndex = newIndex;
+        animFromSlide = presentation.getCurrentSlide();
+        animToSlide = presentation.getSlides().get(newIndex);
+        animationProgress = 0.0f;
+
+        int durationMs = 500;
+        int steps = 25;
+        int delay = durationMs / steps;
+        if (animationTimer != null && animationTimer.isRunning()) {
+            animationTimer.stop();
+        }
+        animationTimer = new javax.swing.Timer(delay, e -> {
+            animationProgress += 1.0f / steps;
+            if (animationProgress >= 1.0f) {
+                animationProgress = 1.0f;
+                animationTimer.stop();
+                animating = false;
+                presentation.setCurrentIndex(animTargetIndex);
+                animFromSlide = null;
+                animToSlide = null;
+                animTargetIndex = -1;
+                refreshEditorViews();
+            }
+            slideShowPanel.repaint();
+        });
+        animationTimer.start();
     }
 
     private void refreshEditorViews() {
@@ -185,13 +241,24 @@ public class SlideShowWindow extends JFrame {
             g2d.translate(x, y);
             g2d.scale(scale, scale);
 
-            // 先填充幻灯片区域为白色，避免背景变黑
-            g2d.setColor(Color.WHITE);
-            g2d.fillRect(0, 0, SlideConstants.SLIDE_WIDTH, SlideConstants.SLIDE_HEIGHT);
-
-            Slide slide = presentation.getCurrentSlide();
-            for (SlideObject object : slide.getObjects()) {
-                object.draw(g2d);
+            if (animating && animFromSlide != null && animToSlide != null
+                    && transitionEffect != TransitionEffect.NONE) {
+                switch (transitionEffect) {
+                    case FADE:
+                        paintFadeTransition(g2d);
+                        break;
+                    case SLIDE:
+                        paintSlideTransition(g2d);
+                        break;
+                    case ZOOM:
+                        paintZoomTransition(g2d);
+                        break;
+                    default:
+                        paintSlideContent(g2d, presentation.getCurrentSlide());
+                        break;
+                }
+            } else {
+                paintSlideContent(g2d, presentation.getCurrentSlide());
             }
 
             g2d.dispose();
@@ -229,7 +296,122 @@ public class SlideShowWindow extends JFrame {
             JMenuItem exitItem = new JMenuItem("结束放映");
             exitItem.addActionListener(e -> SlideShowWindow.this.dispose());
             menu.add(exitItem);
+
+            JMenu effectMenu = new JMenu("切换效果");
+            JRadioButtonMenuItem noneItem = new JRadioButtonMenuItem("无");
+            JRadioButtonMenuItem fadeItem = new JRadioButtonMenuItem("淡入淡出");
+            JRadioButtonMenuItem slideItem = new JRadioButtonMenuItem("滑动");
+            JRadioButtonMenuItem zoomItem = new JRadioButtonMenuItem("缩放");
+
+            ButtonGroup group = new ButtonGroup();
+            group.add(noneItem);
+            group.add(fadeItem);
+            group.add(slideItem);
+            group.add(zoomItem);
+
+            switch (transitionEffect) {
+                case NONE:
+                    noneItem.setSelected(true);
+                    break;
+                case FADE:
+                    fadeItem.setSelected(true);
+                    break;
+                case SLIDE:
+                    slideItem.setSelected(true);
+                    break;
+                case ZOOM:
+                    zoomItem.setSelected(true);
+                    break;
+                default:
+                    fadeItem.setSelected(true);
+            }
+
+            noneItem.addActionListener(e -> transitionEffect = TransitionEffect.NONE);
+            fadeItem.addActionListener(e -> transitionEffect = TransitionEffect.FADE);
+            slideItem.addActionListener(e -> transitionEffect = TransitionEffect.SLIDE);
+            zoomItem.addActionListener(e -> transitionEffect = TransitionEffect.ZOOM);
+
+            effectMenu.add(noneItem);
+            effectMenu.add(fadeItem);
+            effectMenu.add(slideItem);
+            effectMenu.add(zoomItem);
+            menu.addSeparator();
+            menu.add(effectMenu);
+
             menu.show(this, x, y);
+        }
+
+        private void paintSlideContent(Graphics2D g2d, Slide slide) {
+            Color bg = slide.getBackgroundColor();
+            if (bg == null) {
+                bg = Color.WHITE;
+            }
+            g2d.setColor(bg);
+            g2d.fillRect(0, 0, SlideConstants.SLIDE_WIDTH, SlideConstants.SLIDE_HEIGHT);
+            for (SlideObject object : slide.getObjects()) {
+                object.draw(g2d);
+            }
+        }
+
+        private void paintFadeTransition(Graphics2D base) {
+            Graphics2D gFrom = (Graphics2D) base.create();
+            Graphics2D gTo = (Graphics2D) base.create();
+
+            float alphaFrom = 1.0f - animationProgress;
+            gFrom.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alphaFrom));
+            paintSlideContent(gFrom, animFromSlide);
+            gFrom.dispose();
+
+            float alphaTo = animationProgress;
+            gTo.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alphaTo));
+            paintSlideContent(gTo, animToSlide);
+            gTo.dispose();
+        }
+
+        private void paintSlideTransition(Graphics2D base) {
+            double offset = SlideConstants.SLIDE_WIDTH * animationProgress;
+
+            Graphics2D gFrom = (Graphics2D) base.create();
+            Graphics2D gTo = (Graphics2D) base.create();
+
+            if (animForward) {
+                gFrom.translate(-offset, 0);
+                paintSlideContent(gFrom, animFromSlide);
+                gTo.translate(SlideConstants.SLIDE_WIDTH - offset, 0);
+                paintSlideContent(gTo, animToSlide);
+            } else {
+                gFrom.translate(offset, 0);
+                paintSlideContent(gFrom, animFromSlide);
+                gTo.translate(-SlideConstants.SLIDE_WIDTH + offset, 0);
+                paintSlideContent(gTo, animToSlide);
+            }
+
+            gFrom.dispose();
+            gTo.dispose();
+        }
+
+        private void paintZoomTransition(Graphics2D base) {
+            Graphics2D gFrom = (Graphics2D) base.create();
+            Graphics2D gTo = (Graphics2D) base.create();
+
+            float alphaFrom = 1.0f - animationProgress;
+            gFrom.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alphaFrom));
+            paintSlideContent(gFrom, animFromSlide);
+            gFrom.dispose();
+
+            double zoom = 0.8 + 0.2 * animationProgress;
+            int cx = SlideConstants.SLIDE_WIDTH / 2;
+            int cy = SlideConstants.SLIDE_HEIGHT / 2;
+            AffineTransform old = gTo.getTransform();
+            gTo.translate(cx, cy);
+            gTo.scale(zoom, zoom);
+            gTo.translate(-cx, -cy);
+
+            float alphaTo = 0.5f + 0.5f * animationProgress;
+            gTo.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alphaTo));
+            paintSlideContent(gTo, animToSlide);
+            gTo.setTransform(old);
+            gTo.dispose();
         }
     }
 }

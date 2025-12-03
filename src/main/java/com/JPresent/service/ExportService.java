@@ -36,7 +36,11 @@ public class ExportService {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        g2d.setColor(Color.WHITE);
+        Color bg = slide.getBackgroundColor();
+        if (bg == null) {
+            bg = Color.WHITE;
+        }
+        g2d.setColor(bg);
         g2d.fillRect(0, 0, SlideConstants.SLIDE_WIDTH, SlideConstants.SLIDE_HEIGHT);
         for (SlideObject object : slide.getObjects()) {
             object.draw(g2d);
@@ -70,7 +74,11 @@ public class ExportService {
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-                g2d.setColor(Color.WHITE);
+                Color bg = slide.getBackgroundColor();
+                if (bg == null) {
+                    bg = Color.WHITE;
+                }
+                g2d.setColor(bg);
                 g2d.fillRect(0, 0, SlideConstants.SLIDE_WIDTH, SlideConstants.SLIDE_HEIGHT);
                 for (SlideObject object : slide.getObjects()) {
                     object.draw(g2d);
@@ -106,7 +114,11 @@ public class ExportService {
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-            g2d.setColor(Color.WHITE);
+            Color bg = slide.getBackgroundColor();
+            if (bg == null) {
+                bg = Color.WHITE;
+            }
+            g2d.setColor(bg);
             g2d.fillRect(0, 0, SlideConstants.SLIDE_WIDTH, SlideConstants.SLIDE_HEIGHT);
             for (SlideObject object : slide.getObjects()) {
                 object.draw(g2d);

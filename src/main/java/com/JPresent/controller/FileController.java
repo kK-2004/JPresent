@@ -37,6 +37,10 @@ public class FileController {
     }
 
     public void newPresentation() {
+        // 新建文稿视为重大操作，清空历史
+        if (slidePanel.getUndoRedoService() != null) {
+            slidePanel.getUndoRedoService().clear();
+        }
         presentation.getSlides().clear();
         presentation.addSlide(new com.JPresent.model.Slide());
         presentation.setCurrentIndex(0);
@@ -72,6 +76,10 @@ public class FileController {
             return;
         }
         try {
+            // 打开新文稿也清空历史
+            if (slidePanel.getUndoRedoService() != null) {
+                slidePanel.getUndoRedoService().clear();
+            }
             fileService.load(presentation, file);
             currentFile = file;
             slidePanel.repaint();
@@ -190,6 +198,7 @@ public class FileController {
      * 新建空白幻灯片并切换到新页。
      */
     public void addNewSlide() {
+        slidePanel.snapshotForUndo();
         presentation.addSlide(new com.JPresent.model.Slide());
         int lastIndex = presentation.getSlides().size() - 1;
         presentation.setCurrentIndex(lastIndex);

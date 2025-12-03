@@ -26,6 +26,11 @@ public class AppMenuBar extends JMenuBar {
         fileMenu.addSeparator();
         fileMenu.add(createMenuItem("退出", "Alt+F4", e -> window.dispose()));
 
+        // 编辑菜单
+        JMenu editMenu = createMenu("编辑");
+        editMenu.add(createMenuItem("撤销", "Ctrl+Z", e -> window.undo()));
+        editMenu.add(createMenuItem("重做", "Ctrl+Y", e -> window.redo()));
+
         // 插入菜单
         JMenu insertMenu = createMenu("插入");
         insertMenu.add(createMenuItem("新建幻灯片", "Ctrl+M", e -> fileController.addNewSlide()));
@@ -43,6 +48,7 @@ public class AppMenuBar extends JMenuBar {
         slideShowMenu.add(createMenuItem("从当前幻灯片开始播放", "Shift+F5", e -> window.startSlideShowFromCurrent()));
 
         add(fileMenu);
+        add(editMenu);
         add(insertMenu);
         add(slideShowMenu);
     }
